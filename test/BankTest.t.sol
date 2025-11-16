@@ -2,7 +2,7 @@
 
 pragma solidity ^0.8.30;
 
-import {Test} from "forge-std/Test.sol";
+import {Test, console} from "forge-std/Test.sol";
 import {Bank} from "../src/Bank.sol";
 
 contract BankTest is Test {
@@ -386,5 +386,163 @@ contract BankTest is Test {
 
         vm.expectRevert("Not your account");
         bank.viewBalance();
+    }
+
+    // ========== Transaction History Tests ==========
+
+    // test get transaction history after deposit
+    function testGetTransactionHistoryAfterDeposit() public {
+        console.log("Testing transaction history after deposit");
+
+        // set the msg.sender to user1 and create account
+        vm.prank(user1);
+        bank.createAccount("Alice");
+
+        // set the msg.sender to user2 to deposit to user1's account
+        vm.prank(user2);
+        bank.deposit{value: 2 ether}(user1);
+
+        // get transaction history for user1
+        vm.prank(user1);
+        string[] memory history = bank.getTransactionHistory();
+
+        // assert the history length
+        assertEq(history.length, 1);
+        console.log("Transaction history length:", history.length);
+        console.log("First transaction:", history[0]);
+
+        // verify the transaction contains deposit info
+        assertTrue(bytes(history[0]).length > 0);
+    }
+
+    // test get transaction history after withdraw
+    function testGetTransactionHistoryAfterWithdraw() public {
+        console.log("Testing transaction history after withdraw");
+
+        // set the msg.sender to user1 and create account
+        vm.prank(user1);
+        bank.createAccount("Alice");
+
+        // set the msg.sender to user2 to deposit to user1's account
+        vm.prank(user2);
+        bank.deposit{value: 5 ether}(user1);
+
+        // set the msg.sender to user1 to withdraw
+        vm.prank(user1);
+        bank.withdraw(2 ether);
+
+        // get transaction history for user1
+        vm.prank(user1);
+        string[] memory history = bank.getTransactionHistory();
+
+        // assert the history length (should have deposit and withdraw)
+        assertEq(history.length, 2);
+        console.log("Transaction history length:", history.length);
+        console.log("First transaction:", history[0]);
+        console.log("Second transaction:", history[1]);
+
+        // verify both transactions exist
+        assertTrue(bytes(history[0]).length > 0);
+        assertTrue(bytes(history[1]).length > 0);
+    }
+
+    // test get transaction history after transfer
+    function testGetTransactionHistoryAfterTransfer() public {
+        console.log("Testing transaction history after transfer");
+
+        // set the msg.sender to user1 and create account
+        vm.prank(user1);
+        bank.createAccount("Alice");
+
+        // set the msg.sender to user2 and create account
+        vm.prank(user2);
+        bank.createAccount("Bob");
+
+        // set the msg.sender to user1 to deposit to own account
+        vm.prank(user1);
+        bank.deposit{value: 5 ether}(user1);
+
+        // set the msg.sender to user1 to transfer to user2
+        vm.prank(user1);
+        bank.transferTo(user2, 3 ether);
+
+        // get transaction history for user1 (sender)
+        vm.prank(user1);
+        string[] memory history1 = bank.getTransactionHistory();
+
+        // get transaction history for user2 (receiver)
+        vm.prank(user2);
+        string[] memory history2 = bank.getTransactionHistory();
+
+        // assert the history lengths
+        assertEq(history1.length, 2); // deposit + transfer out
+        assertEq(history2.length, 1); // transfer in
+
+        console.log("User1 transaction history length:", history1.length);
+        console.log("User2 transaction history length:", history2.length);
+        console.log("User1 first transaction:", history1[0]);
+        console.log("User1 second transaction:", history1[1]);
+        console.log("User2 first transaction:", history2[0]);
+    }
+
+    // test clear transaction history
+    function testClearTransactionHistory() public {
+        console.log("Testing clear transaction history");
+
+        // set the msg.sender to user1 and create account
+        vm.prank(user1);
+        bank.createAccount("Alice");
+
+        // set the msg.sender to user2 to deposit to user1's account
+        vm.prank(user2);
+        bank.deposit{value: 2 ether}(user1);
+
+        // set the msg.sender to user1 to withdraw
+        vm.prank(user1);
+        bank.withdraw(1 ether);
+
+        // verify history has 2 transactions
+        vm.prank(user1);
+        string[] memory historyBefore = bank.getTransactionHistory();
+        assertEq(historyBefore.length, 2);
+        console.log("History length before clear:", historyBefore.length);
+
+        // clear the history
+        vm.prank(user1);
+        bank.clearHistory();
+
+        // verify history is empty
+        vm.prank(user1);
+        string[] memory historyAfter = bank.getTransactionHistory();
+        assertEq(historyAfter.length, 0);
+        console.log("History length after clear:", historyAfter.length);
+    }
+
+    // test get transaction history by non-account owner should revert
+    function testGetTransactionHistoryByNonAccountOwner() public {
+        console.log("Testing get transaction history by non-account owner");
+
+        // set the msg.sender to user1 and create account
+        vm.prank(user1);
+        bank.createAccount("Alice");
+
+        // set the msg.sender to user2 (who doesn't have an account) to get transaction history
+        vm.prank(user2);
+
+        // user2 tries to get transaction history but doesn't have an account
+        vm.expectRevert("Not your account");
+        bank.getTransactionHistory();
+    }
+
+    // test get transaction history of non-existent account should revert
+    function testGetTransactionHistoryOfNonExistentAccount() public {
+        console.log("Testing get transaction history of non-existent account");
+
+        // set the msg.sender to user1 (who doesn't have an account) to get transaction history
+        vm.prank(user1);
+
+        // user1 tries to get transaction history but doesn't have an account
+        vm.expectRevert("Not your account");
+        bank.getTransactionHistory();
     }
 }

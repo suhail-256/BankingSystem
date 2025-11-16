@@ -56,16 +56,14 @@ contract DeployScript is Script {
 
         // -- Read balances and print to console (use pranks so getAccountDetails/viewBalance uses msg.sender) --
         vm.prank(user1);
-        (address o1, string memory n1, uint256 balance1, bool e1) = bank
-            .getAccountDetails(user1);
+        (address o1, string memory n1, uint256 balance1, bool e1) = bank.getAccountDetails(user1);
         console.log("User1 => owner:", o1);
         console.log("User1 => name:", n1);
         console.log("User1 => balance:", balance1);
         console.log("User1 => exists:", e1 ? 1 : 0);
 
         vm.prank(user2);
-        (address o2, string memory n2, uint256 balance2, bool e2) = bank
-            .getAccountDetails(user2);
+        (address o2, string memory n2, uint256 balance2, bool e2) = bank.getAccountDetails(user2);
         console.log("User2 => owner:", o2);
         console.log("User2 => name:", n2);
         console.log("User2 => balance:", balance2);

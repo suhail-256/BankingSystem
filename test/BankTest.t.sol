@@ -44,8 +44,7 @@ contract BankTest is Test {
         // retrieve the account details of user1
         // ensure the call is made as user1 since getAccountDetails uses onlyAccountOwner
         vm.prank(user1);
-        (address owner, string memory name, uint256 balance, bool exists) = bank
-            .getAccountDetails(user1);
+        (address owner, string memory name, uint256 balance, bool exists) = bank.getAccountDetails(user1);
 
         // assert the account details
 
@@ -90,7 +89,7 @@ contract BankTest is Test {
 
         // retrieve the account details of user1
         vm.prank(user1);
-        (, , uint256 balance, ) = bank.getAccountDetails(user1);
+        (,, uint256 balance,) = bank.getAccountDetails(user1);
 
         // assert the balance
 
@@ -154,7 +153,7 @@ contract BankTest is Test {
 
         // retrieve the account details of user1
         vm.prank(user1);
-        (, , uint256 balance, ) = bank.getAccountDetails(user1);
+        (,, uint256 balance,) = bank.getAccountDetails(user1);
 
         // assert the balance
 
@@ -211,6 +210,7 @@ contract BankTest is Test {
         vm.expectRevert("Not your account");
         bank.withdraw(1 ether);
     }
+
     // transfer test
     function testTransferTo() public {
         // set the msg.sender to user1 and create account
@@ -241,11 +241,11 @@ contract BankTest is Test {
 
         // retrieve the account details of user1
         vm.prank(user1);
-        (, , uint256 balance1, ) = bank.getAccountDetails(user1);
+        (,, uint256 balance1,) = bank.getAccountDetails(user1);
 
         // retrieve the account details of user2
         vm.prank(user2);
-        (, , uint256 balance2, ) = bank.getAccountDetails(user2);
+        (,, uint256 balance2,) = bank.getAccountDetails(user2);
 
         // assert the balances
 

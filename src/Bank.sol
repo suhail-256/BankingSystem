@@ -19,17 +19,9 @@ contract Bank {
     // events
 
     event AccountCreated(address indexed owner, string name);
-    event DepositMade(
-        address indexed depositor,
-        address indexed to,
-        uint256 amount
-    );
+    event DepositMade(address indexed depositor, address indexed to, uint256 amount);
     event WithdrawalMade(address indexed owner, uint256 amount);
-    event TransferMade(
-        address indexed sender,
-        address indexed receiver,
-        uint256 amount
-    );
+    event TransferMade(address indexed sender, address indexed receiver, uint256 amount);
 
     // modifire to control account accses
 
@@ -48,12 +40,7 @@ contract Bank {
     function createAccount(string memory _name) public {
         require(!accounts[msg.sender].exists, "Account already exists");
 
-        accounts[msg.sender] = Account({
-            owner: msg.sender,
-            name: _name,
-            balance: 0,
-            exists: true
-        });
+        accounts[msg.sender] = Account({owner: msg.sender, name: _name, balance: 0, exists: true});
 
         emit AccountCreated(msg.sender, _name);
     }
@@ -82,7 +69,7 @@ contract Bank {
         accounts[msg.sender].balance -= amount;
 
         // 3. Interactions
-        (bool success, ) = payable(msg.sender).call{value: amount}("");
+        (bool success,) = payable(msg.sender).call{value: amount}("");
         require(success, "Transfer failed");
 
         emit WithdrawalMade(msg.sender, amount);
@@ -110,9 +97,7 @@ contract Bank {
 
     // function to get account details
 
-    function getAccountDetails(
-        address owner
-    )
+    function getAccountDetails(address owner)
         public
         view
         accountdoesNotExists(owner)

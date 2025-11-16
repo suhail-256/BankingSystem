@@ -144,6 +144,10 @@ contract Bank {
     // add transaction history to the account
     function _addTransactionHistory(address from, address to, TxType txType, uint256 amount) private {
 
+        // check if the transaction history length is greater than 30 and if it is, remove the oldest transaction
+        _checkTransactionHistoryLength(from);
+        _checkTransactionHistoryLength(to);
+
         // convert the timestamp, amount, from, and to to strings
         string memory timestamp = block.timestamp.toString();
         string memory amountStr = amount.toString();

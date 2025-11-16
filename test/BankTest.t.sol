@@ -545,4 +545,14 @@ contract BankTest is Test {
         vm.expectRevert("Not your account");
         bank.getTransactionHistory();
     }
+
+    function testSendFortyTransactions() public {
+        vm.startPrank(user1);
+        bank.createAccount("FortyTxReceiver");
+
+        for (uint256 i = 0; i < 40; i++) {
+            bank.deposit{value: 0.0001 ether}(user1);
+        }
+        vm.stopPrank();
+    }
 }
